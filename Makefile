@@ -1,43 +1,49 @@
-# These flags work with the Intel 15+ compiler.
-OPT	 = -Ofast
-OMPFLAGS = -qopenmp
+# These flags work with the Intel compiler
+OPT	  = -Ofast
+
+# Intel Fortran compiler supports coarrays on Linux only
+FC	  = ifort
+FFLAGS    = $(OPT) -std08 -coarray
 
 # Intel C compiler
-OMPCC    = icc $(OMPFLAGS)
-CFLAGS   = $(OPT)
-
-# Intel Fortran compiler supports coarrays
-FC	 = ifort
-FFLAGS   = $(OPT) -std08
+OMPCC     = icc
+OMPCFLAGS = $(OPT) -qopenmp
 
 # OpenSHMEM compiler wrapper script
-OSHCC    = /opt/shmem/sandia/intel/bin/oshcc
+OSHCC     = /opt/shmem/sandia/intel/bin/oshcc
+OSHCFLAGS = $(CFLAGS)
 
 # UPC Compiler
-UPCC     = true
+UPCC      = /opt/upc/berkeley_upc-2.22.0/bin/upcc
+# If using Berkeley UPC, compiler flags are prepended by -Wc
+UPCFLAGS  = -Wc,$(CFLAGS)
 
 # MPI Compiler
-MPICC    = /opt/mpich/dev/intel/default/bin/mpicc
+MPICC     = /opt/mpich/dev/intel/default/bin/mpicc
+MPICFLAGS = $(CFLAGS)
 
 # Intel Fortran does not support coarrays on Mac...
-TESTS = upc.x shmem.x mpirma.x openmp1.x openmp2.x #coarray.x
+TESTS  = upc.x shmem.x mpirma.x openmp1.x openmp2.x
+ifeq (`uname`,Linux)
+TESTS += coarray.x
+endif
 
 all: $(TESTS)
 
 upc.x: upc.upc
-	$(UPCC) $(CFLAGS) $< -o $@
+	$(UPCC) $(UPCFLAGS) $< -o $@
 
 shmem.x: shmem.c
-	$(OSHCC) $(CFLAGS) $< -o $@
+	$(OSHCC) $(OSHCFLAGS) $< -o $@
 
 mpirma.x: mpirma.c
-	$(MPICC) $(CFLAGS) $< -o $@
+	$(MPICC) $(MPICFLAGS) $< -o $@
 
 openmp1.x: openmp1.c
-	$(OMPCC) $(CFLAGS) $< -o $@
+	$(OMPCC) $(OMPCFLAGS) $< -o $@
 
 openmp2.x: openmp2.c
-	$(OMPCC) $(CFLAGS) $< -o $@
+	$(OMPCC) $(OMPCFLAGS) $< -o $@
 
 coarray.x: coarray.f90
 	$(FC) $(FFLAGS) $< -o $@
