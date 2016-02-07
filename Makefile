@@ -1,30 +1,51 @@
-# These flags work with the Intel compiler
-OPT	  = -Ofast
+# These flags work with pretty much any compiler
+OPT	  = -O3
 
-# Intel Fortran compiler supports coarrays on Linux only
+# Fortran 2008 compiler
 FC	  = ifort
+ifeq ($(FC),ifort)
 FFLAGS    = $(OPT) -std08 -coarray
+endif
+ifeq ($(FC),gfortran)
+FFLAGS    = $(OPT) -std=f2008 -fcoarray=single
+endif
 
-# Intel C compiler
+# OpenMP C99 compiler
 OMPCC     = icc
+ifeq ($(OMPCC),icc)
 OMPCFLAGS = $(OPT) -qopenmp
+else # GCC and Clang, at least
+OMPCFLAGS = $(OPT) -fopenmp
+endif
 
 # OpenSHMEM compiler wrapper script
-OSHCC     = /opt/shmem/sandia/intel/bin/oshcc
+OSHCC     = oshcc
 OSHCFLAGS = $(CFLAGS)
 
 # UPC Compiler
-UPCC      = /opt/upc/berkeley_upc-2.22.0/bin/upcc
-# If using Berkeley UPC, compiler flags are prepended by -Wc
+UPCC      = upcc
+# Berkeley UPC
+ifeq ($(UPCC),upcc)
 UPCFLAGS  = -Wc,$(CFLAGS)
+endif
+# Intrepid GCC UPC
+ifeq ($(UPCC),gupc)
+UPCFLAGS  = $(CFLAGS) -x upc
+endif
 
 # MPI Compiler
-MPICC     = /opt/mpich/dev/intel/default/bin/mpicc
+MPICC     = mpicc
 MPICFLAGS = $(CFLAGS)
 
-# Intel Fortran does not support coarrays on Mac...
 TESTS  = upc.x shmem.x mpirma.x openmp1.x openmp2.x
-ifeq (`uname`,Linux)
+
+# Intel Fortran does not support coarrays on Mac...
+ifeq ($(FC),ifort)
+ifeq ($(shell uname),Linux)
+TESTS += coarray.x
+endif
+endif
+ifeq ($(FC),gfortran)
 TESTS += coarray.x
 endif
 
