@@ -19,7 +19,8 @@ UPCC     = true
 # MPI Compiler
 MPICC    = /opt/mpich/dev/intel/default/bin/mpicc
 
-TESTS = upc.x shmem.x mpirma.x openmp1.x openmp2.x coarray.x
+# Intel Fortran does not support coarrays on Mac...
+TESTS = upc.x shmem.x mpirma.x openmp1.x openmp2.x #coarray.x
 
 all: $(TESTS)
 
