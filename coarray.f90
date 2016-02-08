@@ -5,7 +5,7 @@
       if (num_images()<2) stop 1
       ! allocate from the shared heap
       allocate(A(1)[*])
-      B = 37;
+      B = 134;
       ! store contents of local B at PE 0 into A at PE 1
       if (this_image().eq.0) A(1)[1] = B
       ! global synchronization of execution and data

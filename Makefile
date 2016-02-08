@@ -23,7 +23,7 @@ OSHCC     = oshcc
 OSHCFLAGS = $(CFLAGS)
 
 # UPC Compiler
-UPCC      = upcc
+UPCC      = gupc
 # Berkeley UPC
 ifeq ($(UPCC),upcc)
 UPCFLAGS  = -Wc,$(CFLAGS)
@@ -37,7 +37,7 @@ endif
 MPICC     = mpicc
 MPICFLAGS = $(CFLAGS)
 
-TESTS  = upc.x shmem.x mpirma.x openmp1.x openmp2.x
+TESTS  = shmem.x upc.x mpirma.x openmp1.x openmp2.x openmp3.x
 
 # Intel Fortran does not support coarrays on Mac...
 ifeq ($(FC),ifort)
@@ -66,10 +66,14 @@ openmp1.x: openmp1.c
 openmp2.x: openmp2.c
 	$(OMPCC) $(OMPCFLAGS) $< -o $@
 
+openmp3.x: openmp3.c
+	$(OMPCC) $(OMPCFLAGS) $< -o $@
+
 coarray.x: coarray.f90
 	$(FC) $(FFLAGS) $< -o $@
 
 clean:
-	-rm -f *.o
-	-rm -f $(TESTS)
+	-rm -f  *.o
+	-rm -f  $(TESTS)
+	-rm -fr *.dSYM
 
